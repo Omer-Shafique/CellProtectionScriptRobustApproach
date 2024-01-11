@@ -1,0 +1,28 @@
+let ownerEmail = "a.wahab.katib@gmail.com"; 
+let allowedEmployeeEmails = ["employee1@example.com", "employee2@example.com"]; 
+
+function onEdit() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const user = Session.getActiveUser();
+
+  // Check if the user is the owner or an allowed employee
+  if (user.getEmail() === ownerEmail || allowedEmployeeEmails.includes(user.getEmail())) {
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    
+    for (let i = 0; i < values.length; i++) {
+      for (let j = 0; j < values[i].length; j++) {
+        const cell = sheet.getRange(i + 1, j + 1);
+        if (!cell.isBlank()) {
+          // Protect the non-empty cell
+          const protection = cell.protect();
+          protection.setDescription('Task Protection');
+          protection.removeEditors(protection.getEditors()); // Remove all editors
+          Logger.log('Task cell protected by user: %s', cell.getA1Notation());
+        }
+      }
+    }
+  } else {
+    Logger.log('Unauthorized user. Only the owner and allowed employees can protect task cells.');
+  }
+}
